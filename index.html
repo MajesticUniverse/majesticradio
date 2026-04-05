@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js" defer></script>
     <style>
         :root {
             --bg-primary: #2d1f4e; --bg-secondary: #3d2a6e; --bg-tertiary: #4a3580;
@@ -23,13 +23,12 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         body {
-            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1030 0%, #2d1f4e 50%, #3d2a6e 100%);
-            color: var(--text-primary); min-height: 100vh; min-height: -webkit-fill-available;
-            overflow-x: hidden; display: flex; justify-content: center; align-items: center;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            color: var(--text-primary); min-height: 100vh;
+            overflow-x: hidden; display: flex; justify-content: center; align-items: flex-start;
         }
-        .app-container { width: 100%; max-width: 420px; padding: 24px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 420px; padding: 24px; display: flex; flex-direction: column; align-items: center; }
         .player-card {
             width: 100%; background: rgba(45, 31, 78, 0.6); backdrop-filter: blur(20px);
             border-radius: var(--border-radius-lg); border: 1px solid rgba(255, 255, 255, 0.1);
@@ -201,6 +200,10 @@
         };
         const BASE_URL = 'https://majesticradio.duckdns.org';
         const STATION_IDS = ['liquid_drum','drum__bass','psy_chill','old_goa','progressive_psytrance','psy_tech','dark_room'];
+        const STATION_NAMES = {
+            liquid_drum: 'Liquid Drum', drum__bass: 'Drum & Bass', psy_chill: 'Psy Chill',
+            old_goa: 'Old Goa', progressive_psytrance: 'Progressive Psy', psy_tech: 'Psy Tech', dark_room: 'Dark Room'
+        };
 
         const audio = document.getElementById('audio-player');
         const playBtn = document.getElementById('play-btn'), prevBtn = document.getElementById('prev-btn'), nextBtn = document.getElementById('next-btn');
@@ -216,7 +219,7 @@
         let metadataInterval = null, progressInterval = null, errorTimeout = null;
         let trackData = { duration: 0, elapsed: 0, lastUpdate: 0 }, stationsOpen = false;
 
-        const DEFAULT_COVER_SVG = `image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%237c3aed;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23a78bfa;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='300' height='300' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='80' fill='white' opacity='0.6'%3E🎵%3C/text%3E%3C/svg%3E`;
+        const DEFAULT_COVER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%237c3aed'/%3E%3Cstop offset='100%25' style='stop-color:%23a78bfa'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='300' height='300' fill='url(%23g)'/%3E%3Ctext x='150' y='160' text-anchor='middle' font-family='Arial' font-size='80' fill='white' opacity='0.6'%3E🎵%3C/text%3E%3C/svg%3E";
 
         function formatTime(seconds) { if (!seconds || seconds < 0) return '0:00'; return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`; }
         function updateProgress(elapsed, duration) {
@@ -245,9 +248,14 @@
         function toggleStations() { stationsOpen ? closeStations() : openStations(); }
 
         function renderStationsList() {
-            if (Object.keys(stations).length === 0) { stationsListEl.innerHTML = '<div class="stations-empty">Нет доступных станций</div>'; return; }
+            const keys = Object.keys(stations);
+            if (keys.length === 0) {
+                stationsListEl.innerHTML = '<div class="stations-empty">Нет доступных станций</div>';
+                return;
+            }
             stationsListEl.innerHTML = '';
-            Object.entries(stations).forEach(([key, station]) => {
+            keys.forEach((key) => {
+                const station = stations[key];
                 const btn = document.createElement('button');
                 btn.className = `station-item${key === currentStationKey ? ' active' : ''}`;
                 btn.innerHTML = `<span class="station-dot"></span><span>${station.name}</span>`;
@@ -256,23 +264,45 @@
             });
         }
 
-        async function loadStations() {
-            try {
-                stations = {};
-                for (const stationId of STATION_IDS) {
-                    try {
-                        const streamUrl = STREAM_URLS[stationId];
-                        const response = await fetch(`${BASE_URL}/api/nowplaying/${stationId}`);
-                        if (response.ok) {
-                            const data = await response.json(); let artUrl = DEFAULT_COVER_SVG;
-                            if (data.now_playing?.song?.art?.trim()) { artUrl = data.now_playing.song.art; if (!artUrl.startsWith('http')) artUrl = BASE_URL + artUrl; }
-                            else if (data.station?.front_art?.trim()) { artUrl = data.station.front_art; if (!artUrl.startsWith('http')) artUrl = BASE_URL + artUrl; }
-                            if (streamUrl) stations[stationId] = { name: data.station?.name || stationId, stream: streamUrl.trim(), api: `${BASE_URL}/api/nowplaying/${stationId}`, art: artUrl };
+        // Станции инициализируются мгновенно из захардкоженных данных, API грузится в фоне
+        function initStationsStatic() {
+            stations = {};
+            STATION_IDS.forEach((id) => {
+                stations[id] = { name: STATION_NAMES[id] || id, stream: STREAM_URLS[id], api: `${BASE_URL}/api/nowplaying/${id}`, art: DEFAULT_COVER_SVG };
+            });
+            renderStationsList();
+            // Выбираем первую станцию
+            currentStationKey = STATION_IDS[0];
+            setCoverArt(DEFAULT_COVER_SVG);
+        }
+
+        async function loadStationsBackground() {
+            for (const stationId of STATION_IDS) {
+                try {
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 4000);
+                    const response = await fetch(`${BASE_URL}/api/nowplaying/${stationId}`, { signal: controller.signal });
+                    clearTimeout(timeout);
+                    if (response.ok) {
+                        const data = await response.json();
+                        let artUrl = DEFAULT_COVER_SVG;
+                        if (data.now_playing?.song?.art?.trim()) {
+                            artUrl = data.now_playing.song.art;
+                            if (!artUrl.startsWith('http')) artUrl = BASE_URL + artUrl;
+                        } else if (data.station?.front_art?.trim()) {
+                            artUrl = data.station.front_art;
+                            if (!artUrl.startsWith('http')) artUrl = BASE_URL + artUrl;
                         }
-                    } catch (e) { console.error(`Error ${stationId}:`, e); }
-                }
-                renderStationsList();
-            } catch (e) { console.error('API error:', e); stationsListEl.innerHTML = '<div class="stations-empty">Ошибка загрузки</div>'; }
+                        if (stations[stationId]) {
+                            stations[stationId].name = data.station?.name || stations[stationId].name;
+                            stations[stationId].art = artUrl;
+                        }
+                        // Если текущая станция — обновить обложку
+                        if (stationId === currentStationKey) setCoverArt(artUrl);
+                        renderStationsList();
+                    }
+                } catch (e) { /* ignore, fallback to static data */ }
+            }
         }
 
         function switchStation(key, autoPlay = true) {
@@ -320,7 +350,7 @@
                     if (song.art?.trim()) { let artUrl = song.art; artUrl.startsWith('http') || (artUrl = BASE_URL + artUrl); setCoverArt(artUrl); }
                 }
                 if (duration && elapsed !== undefined) { trackData = { duration, elapsed, lastUpdate: Date.now() }; updateProgress(elapsed, duration); startProgressAnimation(); }
-            } catch (e) { console.log('Metadata error:', e); }
+            } catch (e) { /* silent */ }
         }
         function resetTrackInfo() { trackTitleEl.textContent = '—'; trackArtistEl.textContent = '—'; trackTitleEl.classList.add('placeholder'); trackArtistEl.classList.add('placeholder'); stopProgressAnimation(); trackData = { duration: 0, elapsed: 0, lastUpdate: 0 }; }
         function startVisualizer() { visualizer.classList.add('active'); }
@@ -328,8 +358,8 @@
 
         function setupEventListeners() {
             playBtn.addEventListener('click', togglePlay);
-            prevBtn.addEventListener('click', () => { const keys = Object.keys(stations); if (!keys.length) return; switchStation(keys[keys.indexOf(currentStationKey) <= 0 ? keys.length - 1 : keys.indexOf(currentStationKey) - 1]); });
-            nextBtn.addEventListener('click', () => { const keys = Object.keys(stations); if (!keys.length) return; switchStation(keys[keys.indexOf(currentStationKey) >= keys.length - 1 ? 0 : keys.indexOf(currentStationKey) + 1]); });
+            prevBtn.addEventListener('click', () => { const keys = Object.keys(stations); if (!keys.length) return; const idx = keys.indexOf(currentStationKey); switchStation(keys[idx <= 0 ? keys.length - 1 : idx - 1]); });
+            nextBtn.addEventListener('click', () => { const keys = Object.keys(stations); if (!keys.length) return; const idx = keys.indexOf(currentStationKey); switchStation(keys[idx >= keys.length - 1 ? 0 : idx + 1]); });
             burgerBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleStations(); });
             stationsOverlay.addEventListener('click', (e) => { e.target === stationsOverlay && closeStations(); });
             
@@ -345,20 +375,32 @@
                 Math.abs(diffX) > 50 && Math.abs(diffX) > 1.5 * Math.abs(diffY) && (diffX > 0 ? nextBtn.click() : prevBtn.click());
             }, { passive: true });
             
-            audio.addEventListener('error', (e) => { const err = audio.error; const msg = {1:'ABORTED',2:'NETWORK',3:'DECODE',4:'SRC_NOT_SUPPORTED'}[err?.code] || `ERR_${err?.code}`; console.log('🔊 Audio event:', msg); });
-            audio.addEventListener('playing', () => { console.log('🔊 Playing event'); playbackStarted = true; updateStatus(true); errorTimeout && (clearTimeout(errorTimeout), errorTimeout = null); });
+            audio.addEventListener('error', () => { console.log('🔊 Audio error'); });
+            audio.addEventListener('playing', () => { console.log('🔊 Playing'); playbackStarted = true; updateStatus(true); errorTimeout && (clearTimeout(errorTimeout), errorTimeout = null); });
             audio.addEventListener('stalled', () => { console.log('⚠️ Stalled'); });
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            initPlaceholders(); await loadStations(); setupEventListeners();
-            Object.keys(stations).length > 0 && switchStation(Object.keys(stations)[0], false);
-            if (window.Telegram && window.Telegram.WebApp) {
-                const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
-                document.documentElement.style.setProperty('--bg-primary', tg.themeParams.bg_color || '#2d1f4e');
-                document.documentElement.style.setProperty('--text-primary', tg.themeParams.text_color || '#ffffff');
-            }
-        });
+        // === МГНОВЕННАЯ ИНИЦИАЛИЗАЦИЯ БЕЗ БЛОКИРОВКИ ===
+        initPlaceholders();
+        setupEventListeners();
+        initStationsStatic();
+        
+        // Загрузка данных API в фоне, не блокирует UI
+        loadStationsBackground();
+        
+        // Telegram Web App
+        if (window.Telegram && window.Telegram.WebApp) {
+            try {
+                const tg = window.Telegram.WebApp;
+                tg.ready();
+                tg.expand && tg.expand();
+                if (tg.themeParams) {
+                    if (tg.themeParams.bg_color) document.documentElement.style.setProperty('--bg-primary', tg.themeParams.bg_color);
+                    if (tg.themeParams.text_color) document.documentElement.style.setProperty('--text-primary', tg.themeParams.text_color);
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         window.addEventListener('beforeunload', () => stopPlayback());
         window.RadioApp = { stations, currentStationKey, switchStation, togglePlay, audio };
     </script>
