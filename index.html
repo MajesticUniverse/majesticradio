@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Majestic Radio">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2d1f4e">
+    <meta name="theme-color" content="#1a1030">
     <link rel="manifest" href="manifest.json">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,22 +47,22 @@
             content: '';
             position: fixed;
             inset: -25vmax;
-            background: linear-gradient(135deg, #1a1030 0%, #2d1f4e 50%, #3d2a6e 100%);
+            background: #1a1030;
             z-index: -1;
             pointer-events: none;
         }
-        .app-container { width: 100%; max-width: 420px; padding: 24px; display: flex; flex-direction: column; align-items: center; }
+        .app-container { width: 100%; max-width: 430px; min-height: 100vh; min-height: -webkit-fill-available; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; }
         .player-card {
-            width: 100%; background: rgba(45, 31, 78, 0.6); backdrop-filter: blur(20px);
-            border-radius: var(--border-radius-lg); border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 24px; box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+            width: 100%; background: #1a1030; backdrop-filter: blur(20px);
+            border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.12); border-top: none;
+            padding: 24px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); position: relative; overflow: hidden;
         }
-        .app-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .app-header { width: calc(100% - 18px); margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
         .logo { display: flex; align-items: center; gap: 12px; }
-        .radio-title { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: 1px; }
+        .radio-title { font-size: 18px; font-weight: 600; color: var(--text-primary); letter-spacing: 1px; }
         .header-right { display: flex; align-items: center; gap: 8px; }
         .header-btn {
-            width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 39px; height: 39px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
             background: var(--btn-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--btn-shadow); position: relative; z-index: 60;
@@ -71,7 +71,7 @@
         .header-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
         .burger-btn {
-            width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 39px; height: 39px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
             background: var(--btn-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--btn-shadow); position: relative; z-index: 60;
@@ -88,7 +88,7 @@
         .burger-btn.active .burger-line:nth-child(3) { transform: rotate(-45deg); }
 
         .cover-wrapper {
-            position: relative; width: 100%; margin-bottom: 24px; border-radius: var(--border-radius);
+            position: relative; width: calc(100% - 18px); margin: 0 auto 24px; border-radius: var(--border-radius);
             overflow: hidden; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); aspect-ratio: 1;
         }
         .cover-art {
@@ -117,7 +117,7 @@
             width: 100%; height: 100%; display: block;
         }
 
-        .track-info { text-align: center; margin-bottom: 24px; height: 84px; display: grid; grid-template-rows: 50px 26px; align-content: start; row-gap: 8px; overflow: hidden; }
+        .track-info { text-align: center; width: calc(100% - 18px); margin: 0 auto 24px; height: 84px; display: grid; grid-template-rows: 50px 26px; align-content: start; row-gap: 8px; overflow: hidden; }
         .track-line { position: relative; overflow: hidden; width: 100%; display: flex; align-items: center; justify-content: center; min-width: 0; }
         .track-title { font-size: 26px; font-weight: 700; color: var(--text-primary); line-height: 1.25; height: 50px; transition: opacity 0.2s ease; display: flex; align-items: center; justify-content: center; }
         .track-artist { font-size: 17px; color: var(--text-secondary); font-weight: 400; line-height: 1.2; height: 26px; transition: opacity 0.2s ease; display: flex; align-items: center; justify-content: center; }
@@ -131,7 +131,7 @@
             88%, 100% { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
         }
         
-        .progress-container { width: 100%; margin-bottom: 24px; min-height: 36px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
+        .progress-container { width: calc(100% - 18px); margin: 0 auto 24px; min-height: 36px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
         .progress-container.active { opacity: 1; visibility: visible; }
         .progress-bar { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; overflow: hidden; position: relative; cursor: default; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); border-radius: 2px; transition: width 0.3s ease; }
@@ -139,7 +139,7 @@
         
         .controls { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 32px; }
         .control-btn {
-            width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 60px; height: 60px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
             background: var(--btn-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--btn-shadow);
@@ -149,7 +149,7 @@
         .control-btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.2); }
         
         .play-btn {
-            width: 76px; height: 76px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(167, 139, 250, 0.8));
+            width: 84px; height: 84px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.8), rgba(167, 139, 250, 0.8));
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); color: white;
             border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -214,15 +214,38 @@
         .status-badge.online { background: rgba(16, 185, 129, 0.2); color: var(--success); }
         .status-badge.error { background: rgba(239, 68, 68, 0.2); color: var(--error); }
         
-        @media (max-height: 700px) { .cover-wrapper { max-width: 100%; } .track-title { font-size: 22px; } .app-container { padding: 16px; } }
-        @media (max-width: 400px) { .play-btn { width: 68px; height: 68px; } .controls { gap: 20px; } }
+        @media (max-height: 700px) { .cover-wrapper { max-width: 100%; } .track-title { font-size: 22px; } .app-container { padding: 16px 12px; } }
+        @media (max-width: 768px) {
+            .app-container { max-width: none; padding: 0; }
+            .player-card {
+                min-height: 100vh;
+                min-height: -webkit-fill-available;
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
+                border-bottom: 0;
+                box-shadow: none;
+                padding: 24px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+            }
+        }
+        @media (min-width: 769px) {
+            .app-container {
+                justify-content: center;
+                padding-top: 28px;
+                padding-bottom: 28px;
+            }
+            .player-card {
+                max-height: min(920px, calc(100vh - 56px));
+            }
+        }
+        @media (max-width: 400px) { .play-btn { width: 76px; height: 76px; } .controls { gap: 20px; } }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="player-card">
             <header class="app-header">
-                <div class="logo"><h1 class="radio-title">MAJESTIC RADIO</h1></div>
+                <div class="logo"><h1 class="radio-title">MAJESTIC<br>RADIO</h1></div>
                 <div class="header-right">
                     <div class="status-badge" id="status-badge"><span>Оффлайн</span></div>
                     <button class="header-btn" id="history-btn" title="История треков">
